@@ -14,12 +14,21 @@ $query = sprintf('SELECT city_id, title_ru FROM _cities where region_id = (%s)',
 $query=$dbh->prepare($query);
 $query->execute();
 $rows=$query->fetchAll(PDO::FETCH_ASSOC);
-$dbh=null;
-$query=null;
 
-$countOfNotes = 50;
-printCities($rows,$countOfNotes,$page);
+$countOfNotes = 50;?>
 
+<form>
+   <p><input type="search" name="city" placeholder="Например:Львов"> 
+   <input type="submit" value="Найти"></p>
+  </form>
+ 
+<?php 
+$cityFind = $_GET['city'];
+if($cityFind != ''){
+	search($cityFind);
+} else{
+	printCities($rows,$countOfNotes,$page);
+}
 function printCities($rows,$countOfNotes,$page){
 	$countCity = count($rows);#к-во городов
 	?>
@@ -49,7 +58,27 @@ function printCities($rows,$countOfNotes,$page){
 		<?php }
 		
 		$index++;
-	}
-}
+	} ?>
+	</table>
+<?php }
+
+function search($cityFind){
+	$dbh = new PDO('pgsql:dbname=countries;host=127.0.0.1;','postgres');
+	$query = "SELECT city_id, title_ru FROM _cities where region_id = " . $_SESSION['id'] . " AND title_ru LIKE " . "'%" . $cityFind . "%'";
+	$query=$dbh->prepare($query);
+	$query->execute();
+	$rows=$query->fetchAll(PDO::FETCH_ASSOC); 
+	?>
+	<table border="1">
+			<tr>
+				<td>City</td>
+			</tr>
+	<?php foreach ($rows as $key => $row) { ?>
+			<tr>
+    		    <td><a href="/welcome.php?idCity=<?php echo $row['city_id']?>"><?php echo $row['title_ru']?></a> </td>
+			</tr>
+			<?php
+	} ?>
+	</table>
+<?php }
 ?>
-</table>
