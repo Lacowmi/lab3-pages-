@@ -10,8 +10,9 @@ if($_GET['page'] != ''){
 	$page = 1;
 }
 $dbh = new PDO('pgsql:dbname=countries;host=127.0.0.1;','postgres');
-$query = sprintf('SELECT city_id, title_ru FROM _cities where region_id = (%s)',$_SESSION['id']); 
+$query = sprintf('SELECT city_id, title_ru FROM _cities where region_id = :id'); 
 $query=$dbh->prepare($query);
+$query->bindParam(':id', $_SESSION['id'],PDO::PARAM_INT,7);
 $query->execute();
 $rows=$query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -20,7 +21,7 @@ $countOfNotes = 50;?>
 <form>
    <p><input type="search" name="city" placeholder="Например:Львов"> 
    <input type="submit" value="Найти"></p>
-  </form>
+ </form>
  
 <?php 
 $cityFind = $_GET['city'];
@@ -64,8 +65,10 @@ function printCities($rows,$countOfNotes,$page){
 
 function search($cityFind){
 	$dbh = new PDO('pgsql:dbname=countries;host=127.0.0.1;','postgres');
-	$query = "SELECT city_id, title_ru FROM _cities where region_id = " . $_SESSION['id'] . " AND title_ru LIKE " . "'%" . $cityFind . "%'";
+	$query = "SELECT city_id, title_ru FROM _cities where region_id = :id AND title_ru LIKE :cityFind";
 	$query=$dbh->prepare($query);
+	$query->bindParam(':id', $_SESSION['id'],PDO::PARAM_INT,7);
+	$query->bindParam(':cityFind', $cityFind,PDO::PARAM_STR,25);
 	$query->execute();
 	$rows=$query->fetchAll(PDO::FETCH_ASSOC); 
 	?>
